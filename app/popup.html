@@ -13,11 +13,107 @@
   <link href="styles/main.css" rel="stylesheet">
   <!-- endbuild -->
   </head>
-  <body>
+
+<!--Create a form bootstarp -->
+
+
+
+
+
+<!--Create a Header -->
+  <p> <h3 style="margin:10px" > Sdu Disqus </h3></p> 
+
+
+<!--Create a Body -->
+  <body>   
+    
+    <!--Create a 1st panel (About User:) -->
+    <div class = "panel panel-primary" style="margin:10px">
+
+      <!-- Header -->
+      <div class = "panel-heading" >
+      About User:
+      </div>
+
+      <!-- Body -->
+      <div class = "panel-body"> 
+
+        <!-- Email -->
+        <div class="form-group">
+            <div class="col-lg-10">
+            
+              <input type="email" class="form-control empty" id="inputEmail" placeholder="Email">
+     
+            </div>
+        </div>
+
+        <!-- Name -->
+        <div class="form-group">
+            <div class="col-lg-10">
+              <input type = "text" class="form-control empty" id="textArea" placeholder="Name">
+            </div>
+        </div>
+
+      <!-- END -->
+      </div>
+    </div>
+    <!--  1st Panel END  -->
+
+
+    <!--Create a 2nd panel (Comments:) -->
+    <div class = "panel panel-primary" style="margin:10px">
+
+      <!-- Header -->
+      <div class = "panel-heading" >
+        comments
+      </div>
+      
+
+      <!-- Body -->
+      <div class = "panel-body" style="overflow-y:auto">
+         <!-- Comments list -->
+        <div class="list-group" id="listID" > 
+        </div>
+
+        
+
+      </div>
+
+
+       <!-- Footer -->
+      <div class="panel-footer" style="margin-top:-7%">
+        
+        <!--  New Comment : ICON  -->
+        <i class="mdi-communication-messenger" style="font:20px 'Material-Design-Icons';margin-top:1%"></i>
+        
+        <!--  New Comment : Type comment-->
+        <div class="form-group">
+
+          <div class="form-control-wrapper" style="margin-left:30px"> 
+
+                <input class="form-control empty"  id="focusedInput" type="text" style="margin-top:-7%" disabled="disabled">
+                    <div class="floating-label" >
+                      Type you comment and press Enter
+                    </div>
+                <span class="material-input"></span>
+              
+          </div>
+
+        </div>
+
+      </div>
+  
+    </div>
+    <!--  2nd Panel END  -->
+    
+
+  </body>
+
 
 
   <!-- build:js scripts/vendor.js -->
   <!-- bower:js -->
+
   <script src="bower_components/jquery/dist/jquery.js"></script>
   <script src="bower_components/reactive/ractive.js"></script>
   <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
