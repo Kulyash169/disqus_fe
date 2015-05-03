@@ -1,7 +1,7 @@
 'use strict';
 
 # this script is supposed to have backend related code
-
+chrome.browserAction.setBadgeText({text: "#{m}"})
 module = exports ? this
 
 

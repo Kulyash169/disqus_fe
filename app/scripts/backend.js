@@ -2,6 +2,10 @@
   'use strict';
   var $this, module;
 
+  chrome.browserAction.setBadgeText({
+    text: "" + m
+  });
+
   module = typeof exports !== "undefined" && exports !== null ? exports : this;
 
   $this = {

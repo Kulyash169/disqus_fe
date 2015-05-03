@@ -1,6 +1,76 @@
 var check=0;
+var allComments;
 
 (function() {
+
+	setComment = function(name,comment1,time,image,query1){
+		var list = document.getElementById("listID");
+		if(check!=0){
+			var separator = document.createElement("div");
+			separator.setAttribute("class","list-group-separator");
+			list.appendChild(separator);
+		}
+		
+		//CREATE NEW ELEMENT (ITEM)
+		var item = document.createElement("div");
+		item.setAttribute("class","list-group-item");
+		list.appendChild(item);
+
+			// Icon of comment 
+    		var icon = document.createElement("div");
+    		icon.setAttribute("class","row-action-primary");
+    		item.appendChild(icon);
+
+    			// get picture from Gravatar
+    			var q = document.getElementById('inputEmail').value;
+	    		var pic = document.createElement("img");
+	    		gravatar = image;
+	    		pic.setAttribute("class","circle");
+	    		pic.setAttribute("src",gravatar);
+	    		icon.appendChild(pic);
+
+	    	// Content of comment 
+    		var content = document.createElement("div");
+    		content.setAttribute("class","row-content");
+    		item.appendChild(content);
+
+    			//Create a current date
+    			var curTime;
+    			if(query1==1){
+					var day = time;
+					var today = day.substring(0,10);
+					var dd = today.substring(8,10);
+					var mm = today.substring(5,7);
+					var yyyy = today.substring(2,4);
+					curTime = dd+'.'+mm+'.'+yyyy;
+				}
+				else if(query1==2){
+					curTime=time;
+				}
+				//Set a current date
+	    		var time = document.createElement("div");
+	    		time.setAttribute("class","least-content");
+	    		time.appendChild(document.createTextNode(curTime));
+	    		content.appendChild(time);
+
+	    		//Set a user name
+	    		var header = document.createElement("h4");
+	    		header.setAttribute("class","list-group-item-heading");
+	    		header.appendChild(document.createTextNode(name));
+	    		content.appendChild(header);
+
+	    		//Set a comment
+	    		var comment = document.createElement("p");
+	    		comment.setAttribute("class","list-group-item-text");
+	    		comment.appendChild(document.createTextNode(comment1));
+	    		content.appendChild(comment);
+	    		
+	    		check=1;
+
+
+	}
+
+
 		// get email and name from local storage
 		var mainEmail = localStorage.getItem("email");
 		var mainName = localStorage.getItem("name");
@@ -53,66 +123,22 @@ var check=0;
 		//set GET query
 		$.ajax({url: 'http://127.0.0.1:8000/api/v1/comment/', 
 			success: function(result){
+
 			//get all comments
 				for (var i=0;i<result.objects.length;i++){
-
-					var list = document.getElementById("listID");
-			    		if(check!=0){
-			    			var separator = document.createElement("div");
-			    			separator.setAttribute("class","list-group-separator");
-			    			list.appendChild(separator);
-			    		}
-			    		
-			    		//CREATE NEW ELEMENT (ITEM)
-			    		var item = document.createElement("div");
-			    		item.setAttribute("class","list-group-item");
-			    		list.appendChild(item);
-
-			    			// Icon of comment 
-				    		var icon = document.createElement("div");
-				    		icon.setAttribute("class","row-action-primary");
-				    		item.appendChild(icon);
-
-				    			// get picture from Gravatar
-				    			var q = document.getElementById('inputEmail').value;
-					    		var pic = document.createElement("img");
-					    		gravatar = result.objects[i].image;
-					    		pic.setAttribute("class","circle");
-					    		pic.setAttribute("src",gravatar);
-					    		icon.appendChild(pic);
-
-					    	// Content of comment 
-				    		var content = document.createElement("div");
-				    		content.setAttribute("class","row-content");
-				    		item.appendChild(content);
-
-				    			//Create a current date
-								var day = result.objects[i].pub_time;
-								var today = day.substring(0,10);
-								var dd = today.substring(8,10);
-								var mm = today.substring(5,7);
-								var yyyy = today.substring(2,4);
-
-								//Set a current date
-					    		var time = document.createElement("div");
-					    		time.setAttribute("class","least-content");
-					    		time.appendChild(document.createTextNode(dd+'.'+mm+'.'+yyyy));
-					    		content.appendChild(time);
-
-					    		//Set a user name
-					    		var header = document.createElement("h4");
-					    		header.setAttribute("class","list-group-item-heading");
-					    		header.appendChild(document.createTextNode(result.objects[i].author_title));
-					    		content.appendChild(header);
-
-					    		//Set a comment
-					    		var comment = document.createElement("p");
-					    		comment.setAttribute("class","list-group-item-text");
-					    		comment.appendChild(document.createTextNode(result.objects[i].text));
-					    		content.appendChild(comment);
-					    		
-					    		check=1;
+					var name1 = result.objects[i].author_title;
+					var comment1 = result.objects[i].text;
+					var time1 = result.objects[i].pub_time;
+					var image1 = result.objects[i].image;
+					setComment(name1,comment1,time1,image1,1);
+					allComments=result.objects.length;
+					
 				}
+					var q = document.getElementById("number");
+					q.innerHTML= allComments+" comments";
+					chrome.browserAction.setBadgeText({
+        			text: allComments+""
+      				});	
 			}
 		});
 
@@ -129,14 +155,28 @@ var check=0;
 				localStorage.setItem("name",name);
 
 				//set POST query 
-				var pic = document.getElementById("inputEmail");
-				var name = document.getElementById("textArea");
+				var pic = 'http://www.gravatar.com/avatar/'+CryptoJS.MD5(document.getElementById("inputEmail").value);
+				var name = document.getElementById("textArea").value;
+				var comment = document.getElementById('focusedInput').value;
+				var today = new Date();
+				var mm = today.getMonth()+1;
+				var str = today.toDateString();
+				var y=str.substring(13,15);
+				var d = str.substring(8,10);
+				var m;
+				if(mm<10){
+					m='0'+mm;
+				}
+				else{
+					m=mm;
+				}
+				var time = d+'.'+m+'.'+y;
 
 				var data1 = JSON.stringify(
 					{
-						"text": document.getElementById('focusedInput').value,
-						"author_title": name.value,
-						"image":'http://www.gravatar.com/avatar/'+CryptoJS.MD5(pic.value)
+						"text": comment,
+						"author_title": name,
+						"image":pic
 					}
 				);
 
@@ -148,6 +188,21 @@ var check=0;
 				dataType: 'json',
 				processData: false
 				});
+
+
+				setComment(name,comment,time,pic,2);
+
+				var emptyText=document.getElementById("focusedInput");
+				emptyText.value="";
+
+				allComments++;
+				
+				var q = document.getElementById("number");
+				q.innerHTML= allComments+" comments";
+				chrome.browserAction.setBadgeText({
+        			text: allComments+""
+      				});	
+
 
 			}
 
