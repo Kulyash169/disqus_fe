@@ -9,7 +9,15 @@
   },
   "default_locale": "en",
   "background": {
-    "page": "background.html"
+    "scripts": [
+      "scripts/chromereload.js",
+      "scripts/background.js",
+      "scripts/popup.js",
+      "scripts/ajax.js"
+    ],
+    "pages": [
+      "background.html"
+    ]
   },
   "browser_action": {
     "default_icon": {
@@ -21,7 +29,9 @@
   },
   "permissions": [
     "tabs",
+    "alarms",
     "http://*/*",
-    "https://*/*"
+    "https://*/*",
+    "storage"
   ]
 }

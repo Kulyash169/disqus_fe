@@ -1,9 +1,42 @@
-var check=0;
-var allComments;
+var check=0, hostName, allComments=0,getComments,setComment;
 
 (function() {
+	getComments = function(){
+		
+		$.ajax({url: 'http://127.0.0.1:8000/api/v1/comment/?currentUrl='+hostName, 
+			success: function(result){
+				if(hostName!=""){
+				all = result.objects.length;
+				//get all comments
+					if(allComments<all){
+						for (var i=allComments;i<result.objects.length;i++){
+							var name1 = result.objects[i].author_title;
+							var comment1 = result.objects[i].text;
+							var time1 = result.objects[i].pub_time;
+							var image1 = result.objects[i].image;
+							setComment(name1,comment1,time1,image1);
+							allComments=result.objects[i].id;
+						}
+						allComments=all;
+					}
 
-	setComment = function(name,comment1,time,image,query1){
+						//set HEAD of panel 
+						var q = document.getElementById("number");
+						q.innerHTML= result.objects.length+" comments";
+
+						chrome.browserAction.setBadgeText({
+			              text: result.objects.length + ''
+			            });
+						
+				}
+				}
+			});
+
+		};
+
+
+	// function that create a new item (comment)
+	setComment = function(name,comment1,time,image){
 		var list = document.getElementById("listID");
 		if(check!=0){
 			var separator = document.createElement("div");
@@ -36,17 +69,13 @@ var allComments;
 
     			//Create a current date
     			var curTime;
-    			if(query1==1){
-					var day = time;
-					var today = day.substring(0,10);
-					var dd = today.substring(8,10);
-					var mm = today.substring(5,7);
-					var yyyy = today.substring(2,4);
-					curTime = dd+'.'+mm+'.'+yyyy;
-				}
-				else if(query1==2){
-					curTime=time;
-				}
+				var day = time;
+				var today = day.substring(0,10);
+				var dd = today.substring(8,10);
+				var mm = today.substring(5,7);
+				var yyyy = today.substring(2,4);
+				curTime = dd+'.'+mm+'.'+yyyy;
+				
 				//Set a current date
 	    		var time = document.createElement("div");
 	    		time.setAttribute("class","least-content");
@@ -66,8 +95,6 @@ var allComments;
 	    		content.appendChild(comment);
 	    		
 	    		check=1;
-
-
 	}
 
 
@@ -97,13 +124,14 @@ var allComments;
 			} else {
 				$('#focusedInput').removeAttr('disabled');
 			}
-
 		});
+
 		if (empty) {
 				$('#focusedInput').attr('disabled', 'disabled');
-			} else {
-				$('#focusedInput').removeAttr('disabled');
-			}
+		} 
+		else {
+			$('#focusedInput').removeAttr('disabled');
+		}
 
 
 		$('#focusedInput').keyup(function() {
@@ -119,34 +147,27 @@ var allComments;
 			}
 		});
 
+		//sent some message and get message from background.js... 
+		//...we send it cause it can't take message, if we don't send message 
+		var port = chrome.extension.connect({name: "Sample Communication"});
+		port.postMessage("new mes");
 
-		//set GET query
-		$.ajax({url: 'http://127.0.0.1:8000/api/v1/comment/', 
-			success: function(result){
-
-			//get all comments
-				for (var i=0;i<result.objects.length;i++){
-					var name1 = result.objects[i].author_title;
-					var comment1 = result.objects[i].text;
-					var time1 = result.objects[i].pub_time;
-					var image1 = result.objects[i].image;
-					setComment(name1,comment1,time1,image1,1);
-					allComments=result.objects.length;
-					
-				}
-					var q = document.getElementById("number");
-					q.innerHTML= allComments+" comments";
-					chrome.browserAction.setBadgeText({
-        			text: allComments+""
-      				});	
-			}
+		port.onMessage.addListener(function(msg) {
+		  hostName = msg;  
 		});
+		console.log ("host: "+hostName);		
+		
+		getComments();
+		setInterval(getComments,100);
 
 
+		
+		
 		$('#focusedInput').keyup(function(event) {
 
-
+			//when we presen ENTER
 	    	if(event.keyCode == 13){
+	    		// console.log ("hostName: "+hostName);
 	    		
 	    		//put mail and name to localStorage
 	    		var email=document.getElementById("inputEmail").value;
@@ -154,7 +175,7 @@ var allComments;
 				var name=document.getElementById("textArea").value;
 				localStorage.setItem("name",name);
 
-				//set POST query 
+				//set all needed values (name, comment text, date, etc...)
 				var pic = 'http://www.gravatar.com/avatar/'+CryptoJS.MD5(document.getElementById("inputEmail").value);
 				var name = document.getElementById("textArea").value;
 				var comment = document.getElementById('focusedInput').value;
@@ -172,14 +193,19 @@ var allComments;
 				}
 				var time = d+'.'+m+'.'+y;
 
+				
+
+				//set data that will be added to query
 				var data1 = JSON.stringify(
 					{
 						"text": comment,
 						"author_title": name,
-						"image":pic
+						"image":pic,
+						"currentUrl":hostName
 					}
 				);
 
+				//set POST query 
 				$.ajax({
 				url: 'http://127.0.0.1:8000/api/v1/comment/',
 				type: 'POST',
@@ -188,26 +214,31 @@ var allComments;
 				dataType: 'json',
 				processData: false
 				});
+				//update comments
+				
+				getComments();
 
 
-				setComment(name,comment,time,pic,2);
-
+				//when ENTER is pressed, text field will be empty
 				var emptyText=document.getElementById("focusedInput");
 				emptyText.value="";
 
-				allComments++;
+				//encrease a comment number
+				//allComments++;
+
+				// set change in HEAD of Panel
+				// var q = document.getElementById("number");
+				// q.innerHTML= allComments+" comments";
+
 				
-				var q = document.getElementById("number");
-				q.innerHTML= allComments+" comments";
-				chrome.browserAction.setBadgeText({
-        			text: allComments+""
-      				});	
-
-
 			}
-
 	    	
     	});
+
+  
+
+
+
 
 
 
